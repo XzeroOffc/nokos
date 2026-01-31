@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NokosHub - Panel Otomatis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all duration-500 font-['Inter']">
+
+    <div id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-800 z-50 transform -translate-x-full transition-transform duration-300 shadow-2xl">
+        <div class="p-6">
+            <h2 class="text-2xl font-bold text-blue-600 mb-8">NokosMenu</h2>
+            <nav class="space-y-4">
+                <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-700 transition">
+                    <i data-lucide="shopping-cart"></i> Order Nomor
+                </a>
+                <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-700 transition">
+                    <i data-lucide="wallet"></i> Deposit
+                </a>
+                <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-700 transition">
+                    <i data-lucide="history"></i> Riwayat
+                </a>
+                <hr class="border-slate-200 dark:border-slate-700">
+                <a href="#" onclick="logout()" class="flex items-center gap-3 p-3 text-red-500 rounded-xl hover:bg-red-50 transition">
+                    <i data-lucide="log-out"></i> Keluar
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <div id="app" class="min-h-screen">
+        <header class="sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md z-40 p-4 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-3">
+                <button id="menuToggle" class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg">
+                    <i data-lucide="menu"></i>
+                </button>
+                <span class="font-bold text-xl tracking-tight dark:text-white">Nokos<span class="text-blue-500">Hub</span></span>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button id="themeBtn" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-full relative overflow-hidden">
+                    <i data-lucide="moon" class="dark:hidden"></i>
+                    <i data-lucide="sun" class="hidden dark:block"></i>
+                </button>
+                <div class="relative cursor-pointer">
+                    <i data-lucide="bell"></i>
+                    <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-4xl mx-auto p-6">
+            <div id="authSection" class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl">
+                <h2 class="text-3xl font-bold mb-6 text-center">Selamat Datang 👋</h2>
+                <div class="space-y-4">
+                    <input id="email" type="email" placeholder="Email" class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-700 outline-none border-2 border-transparent focus:border-blue-500 transition">
+                    <input id="pass" type="password" placeholder="Password" class="w-full p-4 rounded-2xl bg-slate-100 dark:bg-slate-700 outline-none border-2 border-transparent focus:border-blue-500 transition">
+                    <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/30 transition">Masuk / Daftar</button>
+                </div>
+            </div>
+
+            <div id="dashboard" class="hidden space-y-6">
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-[2rem] text-white shadow-2xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-blue-100 text-sm">Saldo Akun</p>
+                        <h2 class="text-4xl font-bold my-2">Rp <span id="balance">0</span></h2>
+                        <p id="userMail" class="text-xs opacity-60"></p>
+                    </div>
+                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center gap-2">
+                        <i data-lucide="plus-circle" class="text-blue-500"></i> Deposit
+                    </button>
+                    <button class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center gap-2">
+                        <i data-lucide="user" class="text-purple-500"></i> Profil
+                    </button>
+                </div>
+
+                <h3 class="font-bold text-lg mt-8">Produk Tersedia</h3>
+                <div id="productContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-6 right-6 flex flex-col items-end gap-3">
+        <div id="csMenu" class="hidden flex flex-col gap-2 scale-0 origin-bottom transition-all">
+            <a href="https://wa.me/62xxx" class="bg-white p-3 rounded-full shadow-xl flex items-center gap-2">
+                <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" class="w-6">
+            </a>
+            <a href="https://t.me/yourusername" class="bg-white p-3 rounded-full shadow-xl flex items-center gap-2">
+                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" class="w-6">
+            </a>
+        </div>
+        <button id="csBtn" class="bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:rotate-12 transition">
+            <i data-lucide="message-circle"></i>
+        </button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
