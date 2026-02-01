@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOKOS.ID - Auto Order Nomor Kosong</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/3050/3050525.png">
+</head>
+<body class="light-theme">
+    <!-- Floating CS Button -->
+    <div class="floating-cs" id="csButton">
+        <div class="cs-icon">
+            <i class="fas fa-headset"></i>
+        </div>
+        <div class="cs-tooltip">Hubungi CS</div>
+    </div>
+
+    <!-- CS Modal -->
+    <div class="cs-modal" id="csModal">
+        <div class="cs-modal-content">
+            <div class="cs-modal-header">
+                <h3>Hubungi Customer Service</h3>
+                <span class="close-cs-modal">&times;</span>
+            </div>
+            <div class="cs-modal-body">
+                <p>Pilih kontak customer service yang tersedia:</p>
+                <div class="cs-contact-options">
+                    <a href="https://wa.me/6281234567890" target="_blank" class="cs-option whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp CS</span>
+                    </a>
+                    <a href="https://t.me/usernamecs" target="_blank" class="cs-option telegram">
+                        <i class="fab fa-telegram"></i>
+                        <span>Telegram CS</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Bell -->
+    <div class="notification-container" id="notificationContainer">
+        <div class="notification-bell" id="notificationBell">
+            <i class="fas fa-bell"></i>
+            <span class="notification-count" id="notificationCount">0</span>
+        </div>
+        <div class="notification-dropdown" id="notificationDropdown">
+            <div class="notification-header">
+                <h4>Notifikasi</h4>
+                <span class="mark-all-read">Tandai sudah dibaca</span>
+            </div>
+            <div class="notification-list" id="notificationList">
+                <!-- Notifikasi akan dimuat dinamis -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header & Navigation -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3050/3050525.png" alt="NOKOS Logo">
+                    <h1>NOKOS<span>.ID</span></h1>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <nav class="nav-menu">
+                    <a href="#home" class="nav-link active"><i class="fas fa-home"></i> Beranda</a>
+                    <a href="#products" class="nav-link"><i class="fas fa-shopping-cart"></i> Layanan</a>
+                    <a href="#deposit" class="nav-link"><i class="fas fa-wallet"></i> Deposit</a>
+                    <a href="#history" class="nav-link"><i class="fas fa-history"></i> Riwayat</a>
+                </nav>
+            </div>
+            
+            <div class="header-right">
+                <div class="theme-toggle" id="themeToggle">
+                    <div class="theme-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div class="theme-ripple"></div>
+                </div>
+                
+                <div class="user-profile" id="userProfile">
+                    <div class="profile-img">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <span class="username" id="usernameDisplay">Guest</span>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="#profile" class="dropdown-item"><i class="fas fa-user"></i> Profil</a>
+                        <a href="#settings" class="dropdown-item"><i class="fas fa-cog"></i> Pengaturan</a>
+                        <a href="#orders" class="dropdown-item"><i class="fas fa-shopping-bag"></i> Pesanan Saya</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar Menu -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Menu</h3>
+                <button class="close-sidebar" id="closeSidebar">&times;</button>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#home" class="sidebar-link active"><i class="fas fa-home"></i> Beranda</a>
+                <a href="#products" class="sidebar-link"><i class="fas fa-shopping-cart"></i> Order Nokos</a>
+                <a href="#deposit" class="sidebar-link"><i class="fas fa-wallet"></i> Deposit</a>
+                <a href="#orders" class="sidebar-link"><i class="fas fa-clipboard-list"></i> Pesanan Saya</a>
+                <a href="#history" class="sidebar-link"><i class="fas fa-history"></i> Riwayat Transaksi</a>
+                <a href="#deposit-history" class="sidebar-link"><i class="fas fa-money-check-alt"></i> Riwayat Deposit</a>
+                <a href="#tutorial" class="sidebar-link"><i class="fas fa-book"></i> Tutorial</a>
+                <a href="#faq" class="sidebar-link"><i class="fas fa-question-circle"></i> FAQ</a>
+                <div class="sidebar-divider"></div>
+                <a href="#settings" class="sidebar-link"><i class="fas fa-cog"></i> Pengaturan Akun</a>
+                <a href="#support" class="sidebar-link"><i class="fas fa-headset"></i> Bantuan</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name" id="sidebarUserName">Guest</span>
+                        <span class="user-balance">Saldo: <span id="sidebarBalance">Rp 0</span></span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Login/Signup Section -->
+            <section class="auth-section" id="authSection">
+                <div class="auth-container">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="login">Login</button>
+                        <button class="auth-tab" data-tab="signup">Daftar</button>
+                        <button class="auth-tab" data-tab="github">Login with GitHub</button>
+                    </div>
+                    
+                    <div class="auth-content">
+                        <!-- Login Form -->
+                        <form class="auth-form active" id="loginForm">
+                            <h2>Masuk ke Akun Anda</h2>
+                            <div class="form-group">
+                                <label for="loginEmail">Email</label>
+                                <input type="email" id="loginEmail" placeholder="masukan email anda" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Password</label>
+                                <input type="password" id="loginPassword" placeholder="masukan password" required>
+                                <button type="button" class="toggle-password" data-target="loginPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <button type="submit" class="btn-auth">Login</button>
+                            <div class="auth-links">
+                                <a href="#forgot-password">Lupa Password?</a>
+                            </div>
+                        </form>
+                        
+                        <!-- Signup Form -->
+                        <form class="auth-form" id="signupForm">
+                            <h2>Buat Akun Baru</h2>
+                            <div class="form-group">
+                                <label for="signupUsername">Username</label>
+                                <input type="text" id="signupUsername" placeholder="pilih username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupEmail">Email</label>
+                                <input type="email" id="signupEmail" placeholder="masukan email valid" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupPassword">Password</label>
+                                <input type="password" id="signupPassword" placeholder="minimal 6 karakter" required>
+                                <button type="button" class="toggle-password" data-target="signupPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Konfirmasi Password</label>
+                                <input type="password" id="confirmPassword" placeholder="ulangi password" required>
+                                <button type="button" class="toggle-password" data-target="confirmPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <button type="submit" class="btn-auth">Daftar Sekarang</button>
+                        </form>
+                        
+                        <!-- GitHub Auth -->
+                        <div class="auth-form" id="githubAuth">
+                            <h2>Login dengan GitHub</h2>
+                            <p>Masuk menggunakan akun GitHub Anda</p>
+                            <button class="btn-github" id="githubLoginBtn">
+                                <i class="fab fa-github"></i> Login dengan GitHub
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section class="dashboard-section" id="dashboardSection" style="display: none;">
+                <!-- Welcome Section -->
+                <div class="welcome-card">
+                    <div class="welcome-content">
+                        <h2>Selamat Datang, <span id="welcomeUsername">Pengguna</span>! 👋</h2>
+                        <p>Platform terbaik untuk order nomor kosong berbagai layanan</p>
+                        <div class="user-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon balance">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Saldo</span>
+                                    <span class="stat-value" id="userBalance">Rp 0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon orders">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Total Pesanan</span>
+                                    <span class="stat-value" id="totalOrders">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Sukses</span>
+                                    <span class="stat-value" id="successOrders">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="welcome-illustration">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Aksi Cepat</h3>
+                    <div class="action-grid">
+                        <button class="action-btn" id="quickOrder">
+                            <div class="action-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <span>Order Cepat</span>
+                        </button>
+                        <button class="action-btn" id="quickDeposit">
+                            <div class="action-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <span>Deposit</span>
+                        </button>
+                        <button class="action-btn" id="checkOrders">
+                            <div class="action-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <span>Cek Pesanan</span>
+                        </button>
+                        <button class="action-btn" id="openHistory">
+                            <div class="action-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <span>Riwayat</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <section class="products-section" id="productsSection">
+                    <div class="section-header">
+                        <h3><i class="fas fa-layer-group"></i> Layanan Tersedia</h3>
+                        <div class="section-controls">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="productSearch" placeholder="Cari layanan...">
+                            </div>
+                            <div class="filter-dropdown">
+                                <select id="categoryFilter">
+                                    <option value="all">Semua Kategori</option>
+                                    <option value="whatsapp">WhatsApp</option>
+                                    <option value="telegram">Telegram</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="tiktok">TikTok</option>
+                                    <option value="other">Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="products-grid" id="productsGrid">
+                        <!-- Product cards will be loaded dynamically from API -->
+                    </div>
+                    
+                    <div class="loading-spinner" id="productsLoading">
+                        <div class="spinner"></div>
+                        <p>Memuat layanan...</p>
+                    </div>
+                </section>
+
+                <!-- Deposit Section -->
+                <section class="deposit-section" id="depositSection">
+                    <div class="section-header">
+                        <h3><i class="fas fa-wallet"></i> Deposit Saldo</h3>
+                    </div>
+                    
+                    <div class="deposit-container">
+                        <div class="deposit-methods">
+                            <h4>Metode Pembayaran</h4>
+                            <div class="methods-grid">
+                                <div class="method-card active" data-method="dana">
+                                    <div class="method-icon">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <span>DANA</span>
+                                </div>
+                                <div class="method-card" data-method="ovo">
+                                    <div class="method-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <span>OVO</span>
+                                </div>
+                                <div class="method-card" data-method="gopay">
+                                    <div class="method-icon">
+                                        <i class="fab fa-google"></i>
+                                    </div>
+                                    <span>GoPay</span>
+                                </div>
+                                <div class="method-card" data-method="bank">
+                                    <div class="method-icon">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <span>Transfer Bank</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="deposit-form">
+                            <div class="form-group">
+                                <label for="depositAmount">Jumlah Deposit (Rp)</label>
+                                <input type="number" id="depositAmount" min="10000" max="1000000" placeholder="Minimal Rp 10.000">
+                            </div>
+                            
+                            <div class="amount-presets">
+                                <button class="amount-preset" data-amount="10000">Rp 10.000</button>
+                                <button class="amount-preset" data-amount="25000">Rp 25.000</button>
+                                <button class="amount-preset" data-amount="50000">Rp 50.000</button>
+                                <button class="amount-preset" data-amount="100000">Rp 100.000</button>
+                                <button class="amount-preset" data-amount="250000">Rp 250.000</button>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="depositNote">Catatan (Opsional)</label>
+                                <input type="text" id="depositNote" placeholder="Tambahkan catatan deposit">
+                            </div>
+                            
+                            <button class="btn-deposit" id="submitDeposit">
+                                <i class="fas fa-paper-plane"></i> Deposit Sekarang
+                            </button>
+                            
+                            <div class="deposit-info">
+                                <p><i class="fas fa-info-circle"></i> Deposit akan diproses dalam 1-5 menit setelah pembayaran berhasil</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Orders History -->
+                <section class="history-section" id="historySection">
+                    <div class="section-header">
+                        <h3><i class="fas fa-history"></i> Riwayat Transaksi</h3>
+                        <div class="history-tabs">
+                            <button class="history-tab active" data-tab="orders">Pesanan</button>
+                            <button class="history-tab" data-tab="deposits">Deposit</button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-content">
+                        <div class="history-tab-content active" id="ordersHistory">
+                            <div class="table-responsive">
+                                <table class="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Pesanan</th>
+                                            <th>Layanan</th>
+                                            <th>Harga</th>
+                                            <th>Status</th>
+                                            <th>Tanggal</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTableBody">
+                                        <!-- Orders will be loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="history-tab-content" id="depositsHistory">
+                            <div class="table-responsive">
+                                <table class="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Deposit</th>
+                                            <th>Jumlah</th>
+                                            <th>Metode</th>
+                                            <th>Status</th>
+                                            <th>Tanggal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="depositsTableBody">
+                                        <!-- Deposits will be loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- User Profile Section -->
+                <section class="profile-section" id="profileSection">
+                    <div class="section-header">
+                        <h3><i class="fas fa-user-cog"></i> Pengaturan Akun</h3>
+                    </div>
+                    
+                    <div class="profile-container">
+                        <div class="profile-sidebar">
+                            <div class="profile-menu">
+                                <button class="profile-menu-btn active" data-section="account-info">
+                                    <i class="fas fa-user"></i> Informasi Akun
+                                </button>
+                                <button class="profile-menu-btn" data-section="security">
+                                    <i class="fas fa-shield-alt"></i> Keamanan
+                                </button>
+                                <button class="profile-menu-btn" data-section="notifications">
+                                    <i class="fas fa-bell"></i> Notifikasi
+                                </button>
+                                <button class="profile-menu-btn" data-section="api-settings">
+                                    <i class="fas fa-code"></i> API Settings
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-content">
+                            <!-- Account Info -->
+                            <div class="profile-section-content active" id="accountInfo">
+                                <h4>Informasi Akun</h4>
+                                <div class="profile-info-card">
+                                    <div class="profile-header">
+                                        <div class="profile-avatar-large">
+                                            <i class="fas fa-user-circle"></i>
+                                            <button class="change-avatar-btn">
+                                                <i class="fas fa-camera"></i>
+                                            </button>
+                                        </div>
+                                        <div class="profile-name">
+                                            <h5 id="profileFullName">User Name</h5>
+                                            <span class="profile-email" id="profileEmail">user@email.com</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="profile-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Username</span>
+                                            <span class="detail-value" id="profileUsername">username</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Email</span>
+                                            <span class="detail-value" id="profileEmailValue">user@email.com</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Bergabung Sejak</span>
+                                            <span class="detail-value" id="joinDate">1 Jan 2023</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Total Pesanan</span>
+                                            <span class="detail-value" id="profileTotalOrders">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Security -->
+                            <div class="profile-section-content" id="security">
+                                <h4>Keamanan Akun</h4>
+                                <div class="security-card">
+                                    <div class="security-item">
+                                        <div class="security-info">
+                                            <h5>Ubah Password</h5>
+                                            <p>Ganti password akun Anda</p>
+                                        </div>
+                                        <button class="btn-change-password">Ubah Password</button>
+                                    </div>
+                                    
+                                    <div class="security-item">
+                                        <div class="security-info">
+                                            <h5>Sesi Aktif</h5>
+                                            <p>Kelola perangkat yang sedang login</p>
+                                        </div>
+                                        <button class="btn-manage-sessions">Kelola Sesi</button>
+                                    </div>
+                                    
+                                    <div class="security-item">
+                                        <div class="security-info">
+                                            <h5>Verifikasi 2 Langkah</h5>
+                                            <p>Tambah keamanan dengan 2FA</p>
+                                        </div>
+                                        <button class="btn-enable-2fa">Aktifkan</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3050/3050525.png" alt="NOKOS Logo">
+                        <h3>NOKOS<span>.ID</span></h3>
+                    </div>
+                    <p>Platform auto order nomor kosong terpercaya sejak 2023</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Layanan</h4>
+                    <ul>
+                        <li><a href="#">WhatsApp Number</a></li>
+                        <li><a href="#">Telegram Number</a></li>
+                        <li><a href="#">Instagram Account</a></li>
+                        <li><a href="#">Facebook Account</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Bantuan</h4>
+                    <ul>
+                        <li><a href="#">Cara Order</a></li>
+                        <li><a href="#">Cara Deposit</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Kebijakan Privasi</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> support@nokos.id</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Customer Support</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Indonesia</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 NOKOS.ID - All rights reserved</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Order Modal -->
+    <div class="order-modal" id="orderModal">
+        <div class="order-modal-content">
+            <div class="order-modal-header">
+                <h3 id="orderModalTitle">Order Layanan</h3>
+                <span class="close-order-modal">&times;</span>
+            </div>
+            <div class="order-modal-body" id="orderModalBody">
+                <!-- Order form will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
